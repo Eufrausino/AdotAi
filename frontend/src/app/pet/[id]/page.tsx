@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
-import Modal from "@/components/ui/Modal"; // ⬅️ 1. Importando o Modal
+import Modal from "@/components/ui/Modal";
 
 interface PetDetails {
   id_pet: number;
@@ -32,8 +32,6 @@ export default function DetalhesPet() {
   const [loading, setLoading] = useState(true);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
-  
-  // ⬅️ 2. Estado para controlar o Modal
   const [isModalOpen, setIsModalOpen] = useState(false); 
 
   useEffect(() => {
@@ -77,11 +75,13 @@ export default function DetalhesPet() {
     if (id) buscarDetalhes();
   }, [id, router]);
 
+  // Modificado: Agora redireciona para a página de login se não houver token
   const handleToggleLike = async () => {
     const token = localStorage.getItem("token"); 
     
     if (!token) {
       alert("Você precisa estar logado para curtir um pet!");
+      router.push("/login"); // ⬅️ Redireciona para o login
       return;
     }
 
@@ -108,6 +108,19 @@ export default function DetalhesPet() {
       setLikesCount((prev) => previousIsLiked ? prev + 1 : prev - 1);
       alert("Não foi possível curtir o pet no momento.");
     }
+  };
+
+  // Novo: Função que valida o login antes de abrir o modal de adoção
+  const handleQueroAdotar = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Você precisa estar logado para solicitar uma adoção!");
+      router.push("/login"); // ⬅️ Redireciona para o login
+      return;
+    }
+
+    setIsModalOpen(true); // Abre o modal se estiver logado
   };
 
   const formatarValor = (campo: string, valor: any) => {
@@ -245,7 +258,7 @@ export default function DetalhesPet() {
               <Button
                 variant="secondary"
                 className="w-full sm:w-auto px-12 py-4 text-xl !font-title !font-bold border-[1.5px] border-adotai-textoPrincipal hover:bg-adotai-primaria transition-colors"
-                onClick={() => setIsModalOpen(true)} // ⬅️ 3. Abre o modal ao clicar
+                onClick={handleQueroAdotar} // ⬅️ Modificado: Aponta para a nova função de validação
               >
                 Quero Adotar! 🐾
               </Button>
@@ -255,7 +268,6 @@ export default function DetalhesPet() {
         </div>
       </main>
 
-      {/* ⬅️ 4. Renderizando o Modal no final da tela */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
